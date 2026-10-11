@@ -104,6 +104,18 @@ mkdir -p dist
 pnpm -C packages/jev pack --pack-destination "$PWD/dist"
 ```
 
+Windows 用户可在 PowerShell 中运行对应步骤：
+
+```powershell
+git clone https://github.com/luobosibing2/deepseek-harness-jev.git
+Set-Location deepseek-harness-jev
+pnpm install --frozen-lockfile
+pnpm run build
+New-Item -ItemType Directory -Force .\dist | Out-Null
+$dist = (Resolve-Path .\dist).Path
+pnpm -C packages/jev pack --pack-destination "$dist"
+```
+
 ### 使用 CLI 创建独立试用 profile
 
 也可以把上一步生成的安装包绝对路径填入已有 Web 的插件管理器。以下 CLI 方法用于另建试用环境。

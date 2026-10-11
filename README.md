@@ -104,6 +104,18 @@ mkdir -p dist
 pnpm -C packages/jev pack --pack-destination "$PWD/dist"
 ```
 
+On Windows, run the equivalent steps in PowerShell:
+
+```powershell
+git clone https://github.com/luobosibing2/deepseek-harness-jev.git
+Set-Location deepseek-harness-jev
+pnpm install --frozen-lockfile
+pnpm run build
+New-Item -ItemType Directory -Force .\dist | Out-Null
+$dist = (Resolve-Path .\dist).Path
+pnpm -C packages/jev pack --pack-destination "$dist"
+```
+
 ### Create a separate trial profile with the CLI
 
 You can also paste the built tarball's absolute path into an existing Web plugin manager. The CLI method below creates a separate trial environment.
