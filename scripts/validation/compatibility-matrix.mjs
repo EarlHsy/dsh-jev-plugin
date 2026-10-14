@@ -1,6 +1,6 @@
 /** Verify a plugin tarball through official DSH CLIs and optional authenticated Web checks. */
 import { parseArgs } from 'node:util'
-import { spawn } from 'node:child_process'
+import spawn from 'cross-spawn'
 import { createServer } from 'node:http'
 import { mkdir, writeFile, readFile, cp, stat, symlink } from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'

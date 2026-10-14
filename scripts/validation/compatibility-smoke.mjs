@@ -1,6 +1,6 @@
 /** Build the formal plugin package and verify it with an isolated official DSH release. */
 import { deepStrictEqual } from 'node:assert/strict'
-import { spawn } from 'node:child_process'
+import spawn from 'cross-spawn'
 import { createHash } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
 import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises'
