@@ -154,7 +154,7 @@ function verdict(response, request) {
 	const question = request.questions.find((question) => question.id === "evidence");
 	if (question?.kind !== "choice") return void 0;
 	const selected = question.options.find((option) => option.id === evidence.optionId);
-	if (selected === void 0) return void 0;
+	if (selected === void 0 || selected.id === "insufficient-evidence") return void 0;
 	const state = request.state;
 	if (typeof state !== "object" || state === null || Array.isArray(state) || !("completeEvidence" in state) || state.completeEvidence !== true) return void 0;
 	return {
@@ -226,6 +226,10 @@ function evidence(ctx, agent, mode, budget, requestId) {
 	if (options.length === 0) options.push({
 		id: "no-evidence",
 		description: "No evidence fits the configured budget; choose unknown."
+	});
+	if (options.length < 2) options.push({
+		id: "insufficient-evidence",
+		description: "No supplied reference supports an assessment; choose unknown."
 	});
 	const state = JSON.parse(JSON.stringify({
 		mode,

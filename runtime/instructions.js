@@ -265,7 +265,10 @@ function request(ctx, exec, current, config) {
 			prompt: "No requirements were supplied.",
 			options: [{
 				id: "not-applicable",
-				description: null
+				description: "No supplied requirement applies; this is not proof of general compliance."
+			}, {
+				id: "undetermined",
+				description: "The supplied evidence cannot establish applicable requirements."
 			}]
 		}] : current.sources.map((source) => ({
 			id: source.id,
