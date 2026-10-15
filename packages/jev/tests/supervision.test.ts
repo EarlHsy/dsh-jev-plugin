@@ -6,6 +6,36 @@ import * as supervision from '../src/supervision.ts'
 import { harness, text, call, answer, visible, cleanups } from './fixtures/supervision-harness.ts'
 
 describe('supervision through real AgentLoop, goal driver, tools and HTTP Jev', () => {
+  it.each([24_000, 1])('keeps drift evidence choices valid with a %s-character budget', async evidenceChars => {
+    const h = await harness([call('one'), text('done')], [answer('on-track')], { 'drift-monitoring': true }, { driftInterval: 1, evidenceChars })
+    h.send('Investigate'); await h.agent.whenIdle()
+    await h.requestSeen(1)
+    const criteria = h.requests[0].questions.evidence.criteria
+    expect(Object.keys(criteria).length).toBeGreaterThanOrEqual(2)
+    expect(criteria['insufficient-evidence']).toContain('unknown')
+    if (evidenceChars === 1) {
+      await vi.waitFor(async () => expect((await h.records()).items[0]?.status).toBe('failed'))
+      expect(visible(h.agent)).not.toContain('Correction:')
+    } else {
+      expect(Object.values(criteria)).toContain('[{"type":"text","text":"Investigate"}]')
+    }
+    expect(h.errors).toHaveLength(0)
+  })
+
+  it('never adopts a drift correction citing the insufficient-evidence alternative', async () => {
+    let h: Awaited<ReturnType<typeof harness>>
+    h = await harness([call('one'), async () => {
+      await vi.waitFor(async () => expect((await h.records()).items[0]?.status).toBe('failed'))
+      return text('done')
+    }], [{ answers: { assessment: { choice: 'drift' }, evidence: { choice: 'insufficient-evidence' } } }],
+    { 'drift-monitoring': true }, { driftInterval: 1 })
+    h.send('Investigate'); await h.agent.whenIdle()
+    expect(visible(h.agent)).not.toContain('Correction:')
+    expect(h.errors).toHaveLength(0)
+    const record = await h.ctx.jev.getRecord((await h.records()).items[0]!.id)
+    expect(record?.attemptRecords[0]?.failure?.code).toBe('UNDETERMINED')
+  })
+
   it('registers independent disabled switches and count defaults without making requests', async () => {
     const h = await harness([text('done')], [])
     expect((await h.ctx.jev.listFeatures()).map(feature => [feature.id, feature.enabled])).toEqual([
@@ -41,6 +71,7 @@ describe('supervision through real AgentLoop, goal driver, tools and HTTP Jev', 
     expect(h.requests).toHaveLength(1)
     const request = h.requests[0]
     expect(Object.keys(request.questions)).toEqual(['assessment', 'focus'])
+    for (const question of Object.values(request.questions) as { criteria: object }[]) expect(Object.keys(question.criteria).length).toBeGreaterThanOrEqual(2)
     expect(request.state.requirements[0].content[0].text).toBe('Inspect only; do not repair files')
     expect(JSON.stringify(request)).not.toContain('No source change; investigation result')
     expect(request.state.rules).toContain('running and truthfully reporting failed tests can satisfy a run-and-report request')

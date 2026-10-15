@@ -21,7 +21,7 @@ function verdict(response, request) {
     if (question?.kind !== 'choice')
         return undefined;
     const selected = question.options.find(option => option.id === evidence.optionId);
-    if (selected === undefined)
+    if (selected === undefined || selected.id === 'insufficient-evidence')
         return undefined;
     const state = request.state;
     if (typeof state !== 'object' || state === null || Array.isArray(state) || !('completeEvidence' in state) || state.completeEvidence !== true)
@@ -85,6 +85,8 @@ function evidence(ctx, agent, mode, budget, requestId) {
         options.unshift({ id: goalIdentity(goal), description: omittedGoal ? 'Goal objective exceeds evidence budget; choose unknown.' : goal.objective });
     if (options.length === 0)
         options.push({ id: 'no-evidence', description: 'No evidence fits the configured budget; choose unknown.' });
+    if (options.length < 2)
+        options.push({ id: 'insufficient-evidence', description: 'No supplied reference supports an assessment; choose unknown.' });
     const completionRules = 'Check the submitted answer and claimed deliverables, verification results, and side effects against the actual recorded tool results and applicable user requirements. A final factual claim contradicted by recorded evidence is an omission requiring correction, even if the requested investigation is otherwise finished; it cannot be complete. A supplement may correct the report or complete only work already allowed by the user. Read-only or no-repair instructions remain binding: do not require deleting artifacts, repairing files, or other unauthorized work. A reminder is not itself proof of a violation or a mandatory pause; needs-user requires an actual unresolved user decision, not merely a reminder or a correctable factual error.';
     const state = JSON.parse(JSON.stringify({
         mode, goal: omittedGoal ? { id: goal?.id ?? '', objectiveOmitted: true } : goal ?? null, messages, completeEvidence: !omittedGoal && omitted === 0 && messages.length > 0, omittedMessages: omitted, excludedEarlierMessages: start, evidenceScope: goal?.phase === 'active' ? mode === 'progress' ? 'current and previous goal round with current goal' : 'current goal revision rounds' : 'original user request and its subsequent work', evidenceCharacterBudget: budget,
