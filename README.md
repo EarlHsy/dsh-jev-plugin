@@ -202,6 +202,8 @@ The repository root is the GitHub install entry; `packages/jev` retains developm
 
 The Client CSS build uses paths relative to the package for class-name hashes and sorts class mappings, so the runtime comparison does not depend on the checkout's absolute path or CSS export traversal order.
 
+Protocol-reference preparation uses a directory junction on Windows, so `pnpm run typecheck` and `pnpm run build` do not require elevation or Developer Mode to create that dependency link. Other platforms retain a relative directory symlink. The preparation regression runs in both the Windows job and the standard test suite.
+
 Run `pnpm run test:compatibility` to build and pack the official GitHub-install entry, prepare the exact development DSH version, and check installation, Host components and the Jev Web page in a disposable profile. The [compatibility smoke guide](docs/testing/compatibility-smoke/README.md) covers Chromium setup, explicit version selection and supported-version updates. The check uses local deterministic model replies and needs no real model credentials.
 
 Maintainers can use the [DeepSWE paired-evaluation runner](bench/deepswe/README.md) for coding tasks and the [glob-ranking pipeline](bench/selection/README.md) for fixed path-selection cases. Both use isolated DSH/Pier trials and keep model execution separate from offline checks and reports. The [Chinese evaluation guide](bench/deepswe/README.zh-CN.md) covers the coding-task workflow.
