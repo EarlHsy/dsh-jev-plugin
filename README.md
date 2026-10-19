@@ -73,6 +73,8 @@ The independent **Stage navigation** switch is off by default. It controls the t
 
 Each classification covers one complete DSH model step: its recorded reasoning, text, all tool calls, and paired results. Jev selects one of six stages, `mixed`, or `unknown`; adjacent equal labels merge only within the same turn. The page keeps a multi-turn directory beside the original steps and exposes the actual classification input and answer. Labels and confidence do not establish tool success or classification accuracy. See the [package reference](packages/jev/README.md#stage-navigation) for input, storage, and failure behavior.
 
+Before stage analysis is sent or logged, JSON tool arguments are decoded for credential redaction and serialized again. Incomplete or invalid argument JSON is replaced with an explicit redaction marker. Original Session records remain unchanged; the revised redaction rules mark earlier classifications stale without deleting their saved records.
+
 ## Install through the Web UI (recommended)
 
 Supported DSH releases are **0.1.7-rc.1, 0.1.7-rc.2, 0.2.0-rc.1, 0.2.0-rc.2, 0.2.1-alpha.2 and 0.2.1-alpha.3**. The package declares `>=0.1.7-rc.1 <=0.2.0-rc.2 || 0.2.1-alpha.2 || 0.2.1-alpha.3`; other releases, including 0.2.1-alpha.1, are outside this declaration. Install directly from the GitHub repository URL. No source checkout, manual packaging, or npm login is required.
